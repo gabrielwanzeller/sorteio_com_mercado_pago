@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rifa iPhone 15</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sorteio.css') }}">
+</head>
+<body>
+    <div class="container">
+    <!-- Imagem de capa -->
+        <img src="/static/img/sorteio/imagem_sorteio.png" class="banner"/>
+
+        <!-- Título -->
+        <h1>iPhone 15 + PIX de R$300 🐝 Vem tentar a sorte, princesa!</h1>
+        <p class="valor-cota" id="valor-principal">R$ 0,99</p>
+
+        <!-- Pacote promocional -->
+        <div class="pacotes">
+            <button data-quantidade="30">30 bilhetes por R$ 24,90</button>
+            <button data-quantidade="20">20 bilhetes por R$ 15,90</button>
+        </div>
+
+        <!-- Regulamento -->
+        <div class="regulamento">
+            <h3>📜 PRÊMIOS DO SORTEIO:</h3>
+            <ul>
+            <li>🎁 1º Lugar: iPhone 15 zerado na caixa</li>
+            <li>💸 2º Lugar: PIX de R$300</li>
+            <li>💰 3º Lugar: PIX de R$100</li>
+            </ul>
+            <p>🎟️ Só R$0,99 por cota<br>
+                🎯 2.000 cotas no total<br>
+                🏛️ Sorteio pela Loteria Federal
+            </p>
+        </div>
+
+        <!-- Seletor de bilhetes -->
+        <div class="bilhetes">
+            <p>Quanto mais comprar, maior a chance de ganhar!</p>
+            <div class="btn-group">
+            <button>+1</button>
+            <button>+10</button>
+            <button>+25</button>
+            <button>+100</button>
+            <button>+250</button>
+            <button>+500</button>
+            </div>
+            <div class="qtd">
+            <button>-</button>
+            <input type="number" class="quantidade-input" value="10" min="10" max="100" inputmode="numeric" />
+            <button>+</button>
+            </div>
+            <form id="form-compra" action="/checkout" method="GET">
+                <input type="hidden" name="quantidade" class="quantidade-input-hidden" value="10">
+                <input type="hidden" name="valor" id="input-valor-sorteio" value="">
+                <button class="comprar" type="submit">Comprar: R$ 9,90</button>
+            </form>
+        </div>
+
+        <!-- Organizador -->
+        <div class="organizador">
+            <p>Organizado por <strong>Luísa Ferreira</strong></p>
+        </div>
+    <script src="{{ url_for('static', filename='js/sorteio.js') }}"></script>
+</div>
+</body>
+</html>
