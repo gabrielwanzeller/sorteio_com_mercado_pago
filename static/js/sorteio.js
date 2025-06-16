@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const decrementBtn = document.querySelector('.qtd button:first-child');
   const incrementBtn = document.querySelector('.qtd button:last-child');
   const quantityInput = document.querySelector('.quantidade-input');
-  const comprarBtn = document.querySelector('.comprar');
   const quickAddBtns = document.querySelectorAll('.btn-group button');
 
   const precoPorBilhete = 0.99;
@@ -26,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (quantity < 10) quantity = 10;
     quantityInput.value = quantity;
     const total = (quantity * precoPorBilhete).toFixed(2).replace('.', ',');
+    const comprarBtn = document.querySelector('.comprar');
     comprarBtn.textContent = `Comprar: R$ ${total}`;
     document.querySelector('.quantidade-input-hidden').value = quantity;
 
@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', function () {
       valorInput.value = (quantity * precoPorBilhete).toFixed(2).replace(',', '.');
     }
   }
+
+  // Lógica de redirecionamento para PushinPay com a quantidade
+  const CHECKOUT_BASE_URL = 'https://checkout.pushinpay.com.br/sorteio/SEU_ID_DO_CHECKOUT';
+  const comprarBtn = document.querySelector('.comprar');
+  comprarBtn.addEventListener('click', () => {
+    const quantity = parseInt(quantityInput.value) || 10;
+    const url = `${CHECKOUT_BASE_URL}?quantity=${quantity}`;
+    window.location.href = url;
+  });
 
   decrementBtn.addEventListener('click', () => {
     let quantity = parseInt(quantityInput.value) || 10;

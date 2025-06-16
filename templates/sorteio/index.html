@@ -7,8 +7,10 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/sorteio.css') }}">
 </head>
 <body>
+</head>
+<body>
     <div class="container">
-    <!-- Imagem de capa -->
+        <!-- Imagem de capa -->
         <img src="/static/img/sorteio/imagem_sorteio.png" class="banner"/>
 
         <!-- Título -->
@@ -25,9 +27,9 @@
         <div class="regulamento">
             <h3>📜 PRÊMIOS DO SORTEIO:</h3>
             <ul>
-            <li>🎁 1º Lugar: iPhone 15 zerado na caixa</li>
-            <li>💸 2º Lugar: PIX de R$300</li>
-            <li>💰 3º Lugar: PIX de R$100</li>
+                <li>🎁 1º Lugar: iPhone 15 zerado na caixa</li>
+                <li>💸 2º Lugar: PIX de R$300</li>
+                <li>💰 3º Lugar: PIX de R$100</li>
             </ul>
             <p>🎟️ Só R$0,99 por cota<br>
                 🎯 2.000 cotas no total<br>
@@ -39,29 +41,24 @@
         <div class="bilhetes">
             <p>Quanto mais comprar, maior a chance de ganhar!</p>
             <div class="btn-group">
-            <button>+1</button>
-            <button>+10</button>
-            <button>+25</button>
-            <button>+100</button>
-            <button>+250</button>
-            <button>+500</button>
+                <button>+1</button>
+                <button>+10</button>
+                <button>+25</button>
+                <button>+100</button>
             </div>
             <div class="qtd">
-            <button>-</button>
-            <input type="number" class="quantidade-input" value="10" min="10" max="100" inputmode="numeric" />
-            <button>+</button>
+                <button class="menos">-</button>
+                <input type="number" class="quantidade-input" value="10" min="10" max="100" inputmode="numeric" />
+                <button class="mais">+</button>
             </div>
-            <form id="form-compra" action="/checkout" method="GET">
-                <input type="hidden" name="quantidade" class="quantidade-input-hidden" value="10">
-                <input type="hidden" name="valor" id="input-valor-sorteio" value="">
-                <button class="comprar" type="submit">Comprar: R$ 9,90</button>
-            </form>
+            <button class="comprar" id="btn-comprar">Comprar Agora</button>
         </div>
 
         <!-- Organizador -->
         <div class="organizador">
             <p>Organizado por <strong>Luísa Ferreira</strong></p>
         </div>
+    </div>
     <script src="{{ url_for('static', filename='js/sorteio.js') }}"></script>
 </div>
 </body>

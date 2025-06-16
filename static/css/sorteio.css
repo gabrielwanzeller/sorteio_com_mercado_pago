@@ -131,6 +131,7 @@ h1 {
   font-weight: bold;
   text-align: center;
   width: 60px;
+  max-width: 80px;
   border: 2px solid #ccc;
   border-radius: 6px;
   padding: 6px;
@@ -173,41 +174,8 @@ input[type="number"].quantidade-input {
   color: white;
 }
 
-#status-message {
-  font-weight: bold;
-  margin-top: 15px;
-  color: #d6006d;
-  text-align: center;
-}
-
-.pix-dados {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.pix-dados textarea {
-  font-size: 14px;
-  margin-top: 10px;
-  width: 100%;
-}
-
 @media (max-width: 480px) {
-  .checkout-container {
-    padding: 10px;
-  }
-
-  .product-card {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .product-info {
-    text-align: center;
-  }
-
-  input,
-  select,
-  button {
+  button, input {
     width: 100% !important;
     font-size: 16px;
   }
