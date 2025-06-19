@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const total = (quantity * precoPorBilhete).toFixed(2).replace('.', ',');
     const comprarBtn = document.querySelector('.comprar');
     comprarBtn.textContent = `Comprar: R$ ${total}`;
-    document.querySelector('.quantidade-input-hidden').value = quantity;
 
     const valorInput = document.getElementById('input-valor-sorteio');
     if (valorInput) {
@@ -35,14 +34,37 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Lógica de redirecionamento para PushinPay com a quantidade
-  const CHECKOUT_BASE_URL = 'https://checkout.pushinpay.com.br/sorteio/SEU_ID_DO_CHECKOUT';
+  // Nova lógica para consumir a API /gerar-pix e exibir o QR Code
   const comprarBtn = document.querySelector('.comprar');
   comprarBtn.addEventListener('click', () => {
     const quantity = parseInt(quantityInput.value) || 10;
-    const url = `${CHECKOUT_BASE_URL}?quantity=${quantity}`;
-    window.location.href = url;
+    const valor = (quantity * precoPorBilhete * 100).toFixed(0); // valor em centavos
+
+    fetch("/gerar-pix", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ valor: parseInt(valor) })
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("QR DATA:", data);
+        if (data.qr_code_base64) {
+          document.getElementById("pixArea").style.display = "block";
+          document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
+          document.getElementById("qrcodeTexto").innerText = data.qr_code;
+        } else {
+          alert("Erro ao gerar QR Code");
+        }
+      });
   });
+
+  // Função para copiar o código PIX
+  function copiarCodigo() {
+    const texto = document.getElementById("qrcodeTexto").innerText;
+    navigator.clipboard.writeText(texto).then(() => {
+      alert("Código copiado!");
+    });
+  }
 
   decrementBtn.addEventListener('click', () => {
     let quantity = parseInt(quantityInput.value) || 10;
