@@ -37,25 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Nova lógica para consumir a API /gerar-pix e exibir o QR Code
   const comprarBtn = document.querySelector('.comprar');
   comprarBtn.addEventListener('click', () => {
-    const quantity = parseInt(quantityInput.value) || 10;
-    const valor = (quantity * precoPorBilhete * 100).toFixed(0); // valor em centavos
-
-    fetch("/gerar-pix", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ valor: parseInt(valor) })
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log("QR DATA:", data);
-        if (data.qr_code_base64) {
-          document.getElementById("pixArea").style.display = "block";
-          document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
-          document.getElementById("qrcodeTexto").innerText = data.qr_code;
-        } else {
-          alert("Erro ao gerar QR Code");
-        }
-      });
+    document.getElementById('modal-cadastro').style.display = 'flex';
   });
 
   // Função para copiar o código PIX
@@ -103,6 +85,37 @@ document.addEventListener('DOMContentLoaded', function () {
   quantityInput.addEventListener('input', updateDisplay);
 
   updateDisplay();
+
+  // Função para enviar cadastro
+  window.enviarCadastro = function () {
+    const nome = document.getElementById("nome").value.trim();
+    const celular = document.getElementById("celular").value.trim();
+    const celularConfirmacao = document.getElementById("celular-confirmacao").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const cpf = document.getElementById("cpf").value.trim();
+    const quantidade = parseInt(quantityInput.value) || 10;
+
+    if (!nome || !celular || !email) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    if (celular !== celularConfirmacao) {
+      alert("Os celulares não coincidem.");
+      return;
+    }
+
+    const dados = {
+      nome,
+      celular,
+      email,
+      cpf,
+      quantidade
+    };
+
+    sessionStorage.setItem("dadosCadastro", JSON.stringify(dados));
+    window.location.href = "/pagamento";
+  };
 
   function showError(message) {
     let errorEl = document.querySelector('.error-message');

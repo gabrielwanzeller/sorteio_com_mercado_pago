@@ -180,3 +180,56 @@ input[type="number"].quantidade-input {
     font-size: 16px;
   }
 }
+
+/* Modal de cadastro */
+#modal-cadastro {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+}
+
+#modal-cadastro .modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  position: relative;
+}
+
+#modal-cadastro .modal-content h2 {
+  margin-top: 0;
+}
+
+#modal-cadastro input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+#modal-cadastro button {
+  width: 100%;
+  padding: 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+#modal-cadastro .btn-confirmar {
+  background: #d6006d;
+  color: white;
+}
+
+#modal-cadastro .btn-fechar {
+  margin-top: 10px;
+  background: transparent;
+  color: #555;
+}

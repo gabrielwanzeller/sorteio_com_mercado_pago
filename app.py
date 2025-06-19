@@ -54,5 +54,10 @@ def gerar_pix():
         return jsonify({"erro": "Falha ao gerar PIX"}), 400
 
 
+@app.route("/pagamento")
+def pagamento():
+    return render_template("sorteio/pagamento.html")
+
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5001)

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento via PIX</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pagamento.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Finalize seu pagamento</h1>
+    <p>Escaneie o QR Code ou copie o código abaixo:</p>
+    <div id="pixArea">
+      <img id="qrcodeImg" alt="QR Code do Pix">
+      <p id="qrcodeTexto" class="pix-codigo"></p>
+      <button onclick="copiarCodigo()">Copiar código PIX</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/pagamento.js') }}"></script>
+</body>
+</html>
