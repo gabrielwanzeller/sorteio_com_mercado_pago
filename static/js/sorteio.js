@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const quantityInput = document.querySelector('.quantidade-input');
   const quickAddBtns = document.querySelectorAll('.btn-group button');
 
-  const precoPorBilhete = 0.99;
+  const precoPorBilhete = typeof PRECO_BILHETE !== "undefined" ? PRECO_BILHETE : 0.99;
+  const valorBump = typeof VALOR_BUMP !== "undefined" ? VALOR_BUMP : 9.90;
 
   const valorPrincipal = document.getElementById('valor-principal');
   const precoUnitario = parseFloat(valorPrincipal.textContent.replace('R$', '').replace(',', '.'));
@@ -105,16 +106,32 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    let quantidadeFinal = quantidade;
+    let valorAdicional = 0;
+
+    const bumpCheckbox = document.getElementById("bumpMaisNumeros");
+    if (bumpCheckbox && bumpCheckbox.checked) {
+      quantidadeFinal += 20; // Cliente recebe 20 rifas extras
+      valorAdicional = valorBump;
+    }
+
     const dados = {
       nome,
       celular,
       email,
       cpf,
-      quantidade
+      quantidade: quantidadeFinal,
+      valorAdicional
     };
 
     sessionStorage.setItem("dadosCadastro", JSON.stringify(dados));
-    window.location.href = "/pagamento";
+    const queryParams = new URLSearchParams({
+      nome,
+      quantidade: quantidadeFinal,
+      total: (quantidade * precoPorBilhete + valorAdicional).toFixed(2).replace('.', ','),
+      produto: "Sorteio"
+    });
+    window.location.href = `/pagamento?${queryParams.toString()}`;
   };
 
   function showError(message) {
@@ -127,5 +144,16 @@ document.addEventListener('DOMContentLoaded', function () {
       quantityInput.parentNode.appendChild(errorEl);
     }
     errorEl.textContent = message;
+  }
+
+  // Adiciona clique na bump-box-alerta para marcar/desmarcar o checkbox ao clicar em qualquer lugar da caixa
+  const bumpBoxAlerta = document.querySelector('.bump-box-alerta');
+  if (bumpBoxAlerta) {
+    bumpBoxAlerta.addEventListener('click', (e) => {
+      const checkbox = bumpBoxAlerta.querySelector('input[type="checkbox"]');
+      if (e.target !== checkbox) {
+        checkbox.checked = !checkbox.checked;
+      }
+    });
   }
 });

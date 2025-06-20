@@ -6,14 +6,43 @@
   <title>Pagamento via PIX</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pagamento.css') }}">
 </head>
-<body>
+<body data-valor="{{ total }}">
   <div class="container">
-    <h1>Finalize seu pagamento</h1>
-    <p>Escaneie o QR Code ou copie o código abaixo:</p>
+    <h2>⏳ Você tem <span id="contador">10:00</span> para pagar</h2>
+    <p>Siga os passos abaixo para completar o pagamento via PIX:</p>
+
+    <ol>
+      <li>Copie o código PIX abaixo</li>
+      <li>Abra seu aplicativo bancário e escolha "PIX Copia e Cola"</li>
+      <li>Cole o código e confirme o pagamento</li>
+    </ol>
+
     <div id="pixArea">
+      <input type="text" id="qrcodeTexto" class="pix-codigo" readonly>
+      <button onclick="copiarCodigo()">📋 Copiar código PIX</button>
+    </div>
+
+    <p class="ou">ou</p>
+
+    <div class="qrcode" style="display: none;">
       <img id="qrcodeImg" alt="QR Code do Pix">
-      <p id="qrcodeTexto" class="pix-codigo"></p>
-      <button onclick="copiarCodigo()">Copiar código PIX</button>
+    </div>
+
+    <button class="btn-exibir-qrcode" onclick="document.querySelector('.qrcode').style.display = 'block'; this.style.display = 'none';">
+      📷 Exibir QR Code
+    </button>
+
+    <p class="alerta">⚠️ Este pagamento deve ser feito dentro do tempo. Caso contrário, os títulos voltam a ficar disponíveis.</p>
+
+    <div class="resumo-compra">
+      <h3>Resumo da Compra</h3>
+      <ul>
+        <li><strong>Produto:</strong> {{ produto }}</li>
+        <li><strong>Comprador:</strong> {{ nome }}</li>
+        <li><strong>Quantidade:</strong> {{ quantidade }} títulos</li>
+        <li><strong>Total:</strong> R$ {{ total }}</li>
+        <li><strong>Data/Hora:</strong> {{ data_hora }}</li>
+      </ul>
     </div>
   </div>
 

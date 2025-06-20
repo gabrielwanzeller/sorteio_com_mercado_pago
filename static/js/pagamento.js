@@ -1,13 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const dados = JSON.parse(sessionStorage.getItem("dadosCadastro"));
-
-  if (!dados || !dados.quantidade) {
-    alert("Dados de pagamento não encontrados. Volte e preencha o cadastro.");
-    window.location.href = "/";
-    return;
-  }
-
-  const valor = dados.quantidade * 0.99; // R$ 0,99 por bilhete
+  const valor = parseFloat(document.body.dataset.valor.replace(',', '.')); // R$ 0,99 por bilhete
 
   fetch("/gerar-pix", {
     method: "POST",
@@ -18,16 +10,37 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
       if (data.qr_code_base64) {
         document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
-        document.getElementById("qrcodeTexto").innerText = data.qr_code;
+        document.getElementById("qrcodeTexto").value = data.qr_code;
       } else {
         alert("Erro ao gerar QR Code");
       }
     });
+
+  iniciarContador(600); // 10 minutos em segundos
 });
 
 function copiarCodigo() {
-  const texto = document.getElementById("qrcodeTexto").innerText;
+  const texto = document.getElementById("qrcodeTexto").value;
   navigator.clipboard.writeText(texto).then(() => {
     alert("Código PIX copiado!");
   });
+}
+
+function iniciarContador(segundos) {
+  const contador = document.getElementById("contador");
+
+  const intervalo = setInterval(() => {
+    const min = Math.floor(segundos / 60);
+    const seg = segundos % 60;
+    contador.innerText = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+
+    if (segundos <= 0) {
+      clearInterval(intervalo);
+      contador.innerText = "Expirado";
+      alert("O tempo expirou! Por favor, refaça a compra.");
+      window.location.href = "/";
+    }
+
+    segundos--;
+  }, 1000);
 }

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 import os
 from dotenv import load_dotenv
@@ -8,6 +9,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key_default")
 
 PUSHINPAY_TOKEN = os.environ.get("PUSHINPAY_TOKEN", "SUA_CHAVE_AQUI")
+
+PRECO_POR_BILHETE = float(os.environ.get("PRECO_POR_BILHETE", "0.99"))
 
 
 @app.route("/presell")
@@ -22,7 +25,7 @@ def obrigado():
 
 @app.route("/")
 def home():
-    return render_template("sorteio/index.html")
+    return render_template("sorteio/index.html", preco_bilhete=PRECO_POR_BILHETE)
 
 
 @app.route("/gerar-pix", methods=["POST"])
@@ -56,7 +59,21 @@ def gerar_pix():
 
 @app.route("/pagamento")
 def pagamento():
-    return render_template("sorteio/pagamento.html")
+    # Simulação de dados vindos do formulário
+    produto = request.args.get("produto", "Produto não informado")
+    nome = request.args.get("nome", "Cliente Teste")
+    quantidade = request.args.get("quantidade", 70)
+    total = request.args.get("total", "10,50")
+    data_hora = datetime.now().strftime("%d/%m/%Y às %Hh%M")
+
+    return render_template(
+        "sorteio/pagamento.html",
+        produto=produto,
+        nome=nome,
+        quantidade=quantidade,
+        total=total,
+        data_hora=data_hora
+    )
 
 
 if __name__ == "__main__":
