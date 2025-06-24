@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.qr_code_base64) {
         document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
         document.getElementById("qrcodeTexto").value = data.qr_code;
+        consultarPagamentoPix(data.chave);
       } else {
         alert("Erro ao gerar QR Code");
       }
@@ -43,4 +44,27 @@ function iniciarContador(segundos) {
 
     segundos--;
   }, 1000);
+}
+
+function consultarPagamentoPix(chave) {
+  const intervaloConsulta = setInterval(() => {
+    fetch("/consultar-pix", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ chave })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "aprovado") {
+          clearInterval(intervaloConsulta);
+          alert("Pagamento aprovado! Redirecionando...");
+          window.location.href = "/obrigado";
+        }
+      })
+      .catch(error => {
+        console.error("Erro na consulta PIX:", error);
+      });
+  }, 10000); // consulta a cada 10 segundos
 }

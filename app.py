@@ -1,8 +1,9 @@
 from datetime import datetime
-from flask import Flask, render_template, redirect, url_for, request, jsonify
-import os
-from dotenv import load_dotenv
 import requests
+from dotenv import load_dotenv
+import os
+from flask import Flask, render_template, redirect, url_for, request, jsonify
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -11,6 +12,8 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev_key_default")
 PUSHINPAY_TOKEN = os.environ.get("PUSHINPAY_TOKEN", "SUA_CHAVE_AQUI")
 
 PRECO_POR_BILHETE = float(os.environ.get("PRECO_POR_BILHETE", "0.99"))
+
+# Rota para consultar PIX na PushinPay
 
 
 @app.route("/presell")
@@ -74,6 +77,26 @@ def pagamento():
         total=total,
         data_hora=data_hora
     )
+
+
+@app.route("/consultar-pix", methods=["POST"])
+def consultar_pix():
+    chave = request.json.get("chave")
+    if not chave:
+        return jsonify({"erro": "Chave não fornecida"}), 400
+
+    url = "https://api.pushinpay.com.br/pix/consultar-pix"
+    headers = {
+        "x-api-key": PUSHINPAY_TOKEN,
+        "Content-Type": "application/json"
+    }
+
+    response = requests.get(url, headers=headers, json={"chave": chave})
+
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"erro": "Erro ao consultar PIX"}), response.status_code
 
 
 if __name__ == "__main__":
