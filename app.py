@@ -132,23 +132,27 @@ class Transacao(db.Model):
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    dados = request.json
-    chave = dados.get("chave")
-    status = dados.get("status")
+    try:
+        dados = request.json
+        chave = dados.get("chave")
+        status = dados.get("status")
 
-    print("Webhook recebido:", dados)
+        print("Webhook recebido:", dados)
 
-    if not chave or not status:
-        return jsonify({"erro": "Dados incompletos"}), 400
+        if not chave or not status:
+            return jsonify({"erro": "Dados incompletos"}), 400
 
-    transacao = Transacao.query.filter_by(chave=chave).first()
-    if transacao:
-        transacao.status = status
-        db.session.commit()
-        print(f"Transação {chave} atualizada para {status}")
-        return jsonify({"ok": True})
-    else:
-        return jsonify({"erro": "Transação não encontrada"}), 404
+        transacao = Transacao.query.filter_by(chave=chave).first()
+        if transacao:
+            transacao.status = status
+            db.session.commit()
+            print(f"Transação {chave} atualizada para {status}")
+            return jsonify({"ok": True})
+        else:
+            return jsonify({"erro": "Transação não encontrada"}), 404
+    except Exception as e:
+        print("Erro no processamento do webhook:", e)
+        return jsonify({"erro": "Erro interno no servidor"}), 500
 
 
 if __name__ == "__main__":

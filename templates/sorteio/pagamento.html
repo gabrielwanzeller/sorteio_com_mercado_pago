@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagamento via PIX</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pagamento.css') }}">
 </head>
 <body data-valor="{{ total }}">
@@ -11,11 +12,29 @@
     <h2>⏳ Você tem <span id="contador">10:00</span> para pagar</h2>
     <p>Siga os passos abaixo para completar o pagamento via PIX:</p>
 
-    <ol>
-      <li>Copie o código PIX abaixo</li>
-      <li>Abra seu aplicativo bancário e escolha "PIX Copia e Cola"</li>
-      <li>Cole o código e confirme o pagamento</li>
-    </ol>
+    <div class="pix-benefits">
+      <div class="benefit">
+        <i class="fas fa-clock"></i>
+        <div>
+          <strong>Transferência Instantânea</strong>
+          <p>Pagamento confirmado em segundos, sem esperas.</p>
+        </div>
+      </div>
+      <div class="benefit">
+        <i class="fas fa-qrcode"></i>
+        <div>
+          <strong>Praticidade Máxima</strong>
+          <p>Escaneie o QR Code ou copie o código PIX.</p>
+        </div>
+      </div>
+      <div class="benefit">
+        <i class="fas fa-shield-alt"></i>
+        <div>
+          <strong>Segurança Garantida</strong>
+          <p>Tecnologia do Banco Central para sua tranquilidade.</p>
+        </div>
+      </div>
+    </div>
 
     <div id="pixArea">
       <input type="text" id="qrcodeTexto" class="pix-codigo" readonly>
