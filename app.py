@@ -3,6 +3,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 
@@ -34,6 +35,9 @@ def home():
 @app.route("/gerar-pix", methods=["POST"])
 def gerar_pix():
     valor = request.json.get("valor")
+    nome = request.json.get("nome")
+    celular = request.json.get("celular")
+    email = request.json.get("email")
     # substitua pelo seu link de webhook
     webhook_url = "https://seudominio.com/webhook"
 
@@ -52,9 +56,22 @@ def gerar_pix():
     if response.status_code == 200:
         data = response.json()
         print("Resposta da Pushin:", data)
+        chave_pix = data.get("chave")
+
+        nova_transacao = Transacao(
+            chave=chave_pix,
+            nome=nome,
+            celular=celular,
+            email=email,
+            status="pendente"
+        )
+        db.session.add(nova_transacao)
+        db.session.commit()
+
         return jsonify({
             "qr_code": data["qr_code"],
-            "qr_code_base64": data["qr_code_base64"]
+            "qr_code_base64": data["qr_code_base64"],
+            "chave": chave_pix
         })
     else:
         return jsonify({"erro": "Falha ao gerar PIX"}), 400
@@ -97,6 +114,41 @@ def consultar_pix():
         return jsonify(response.json())
     else:
         return jsonify({"erro": "Erro ao consultar PIX"}), response.status_code
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///transacoes.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+
+class Transacao(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    chave = db.Column(db.String(120), unique=True, nullable=False)
+    nome = db.Column(db.String(100))
+    celular = db.Column(db.String(20))
+    email = db.Column(db.String(100))
+    status = db.Column(db.String(20), default="pendente")
+
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    dados = request.json
+    chave = dados.get("chave")
+    status = dados.get("status")
+
+    print("Webhook recebido:", dados)
+
+    if not chave or not status:
+        return jsonify({"erro": "Dados incompletos"}), 400
+
+    transacao = Transacao.query.filter_by(chave=chave).first()
+    if transacao:
+        transacao.status = status
+        db.session.commit()
+        print(f"Transação {chave} atualizada para {status}")
+        return jsonify({"ok": True})
+    else:
+        return jsonify({"erro": "Transação não encontrada"}), 404
 
 
 if __name__ == "__main__":

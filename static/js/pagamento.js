@@ -44,7 +44,7 @@ function iniciarContador(segundos) {
 
     segundos--;
   }, 1000);
-}
+} 
 
 function consultarPagamentoPix(chave) {
   const intervaloConsulta = setInterval(() => {
