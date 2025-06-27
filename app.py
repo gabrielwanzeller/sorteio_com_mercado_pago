@@ -35,9 +35,6 @@ def home():
 @app.route("/gerar-pix", methods=["POST"])
 def gerar_pix():
     valor = request.json.get("valor")
-    nome = request.json.get("nome")
-    celular = request.json.get("celular")
-    email = request.json.get("email")
     # substitua pelo seu link de webhook
     webhook_url = "https://seudominio.com/webhook"
 
@@ -60,9 +57,6 @@ def gerar_pix():
 
         nova_transacao = Transacao(
             chave=chave_pix,
-            nome=nome,
-            celular=celular,
-            email=email,
             status="pendente"
         )
         db.session.add(nova_transacao)
@@ -124,9 +118,6 @@ db = SQLAlchemy(app)
 class Transacao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chave = db.Column(db.String(120), unique=True, nullable=False)
-    nome = db.Column(db.String(100))
-    celular = db.Column(db.String(20))
-    email = db.Column(db.String(100))
     status = db.Column(db.String(20), default="pendente")
 
 
@@ -156,4 +147,6 @@ def webhook():
 
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True, host='0.0.0.0', port=5001)
