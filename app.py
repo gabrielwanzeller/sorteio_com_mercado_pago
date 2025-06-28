@@ -53,7 +53,11 @@ def gerar_pix():
     if response.status_code == 200:
         data = response.json()
         print("Resposta da Pushin:", data)
-        chave_pix = data.get("chave")
+        chave_pix = data.get("qr_code") or data.get("txid") or data.get(
+            "identificador") or data.get("chave")
+        if not chave_pix:
+            return jsonify({"erro": "Chave não recebida da PushinPay"}), 400
+        print("Dados recebidos da PushinPay:", data)
 
         nova_transacao = Transacao(
             chave=chave_pix,

@@ -66,5 +66,5 @@ function consultarPagamentoPix(chave) {
       .catch(error => {
         console.error("Erro na consulta PIX:", error);
       });
-  }, 5000); // consulta a cada 5 segundos
+  }, 60000); // consulta a cada 60 segundos
 }
