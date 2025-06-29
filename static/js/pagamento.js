@@ -86,27 +86,27 @@ function iniciarContador(segundos) {
 } 
 
 // Consulta o status do pagamento a cada 1 minuto
-function consultarPagamentoPix(chave) {
-  // 🔁 Consulta periódica (1x/minuto) como fallback até o webhook estar 100% confiável.
-  // Pode ser removido depois que o webhook estiver testado e funcionando em produção.
-  const intervaloConsulta = setInterval(() => {
-    fetch("/consultar-pix", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ chave }) // Envia a chave da transação para verificar status
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "aprovado") {
-          clearInterval(intervaloConsulta); // Para a consulta se pagamento foi aprovado
-          alert("Pagamento aprovado! Redirecionando...");
-          window.location.href = "/obrigado"; // Redireciona para página de obrigado
-        }
-      })
-      .catch(error => {
-        console.error("Erro na consulta PIX:", error);
-      });
-  }, 60000); // consulta a cada 60 segundos
-}
+// function consultarPagamentoPix(chave) {
+//   // 🔁 Consulta periódica (1x/minuto) como fallback até o webhook estar 100% confiável.
+//   // Pode ser removido depois que o webhook estiver testado e funcionando em produção.
+//   const intervaloConsulta = setInterval(() => {
+//     fetch("/consultar-pix", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json"
+//       },
+//       body: JSON.stringify({ chave }) // Envia a chave da transação para verificar status
+//     })
+//       .then(res => res.json())
+//       .then(data => {
+//         if (data.status === "aprovado") {
+//           clearInterval(intervaloConsulta); // Para a consulta se pagamento foi aprovado
+//           alert("Pagamento aprovado! Redirecionando...");
+//           window.location.href = "/obrigado"; // Redireciona para página de obrigado
+//         }
+//       })
+//       .catch(error => {
+//         console.error("Erro na consulta PIX:", error);
+//       });
+//   }, 60000); // consulta a cada 60 segundos
+// }
