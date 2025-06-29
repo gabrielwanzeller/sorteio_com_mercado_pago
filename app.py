@@ -208,4 +208,5 @@ def handle_join(chave):
 #     socketio.run(app, debug=True, host='0.0.0.0', port=5001)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=10000)
+    from os import environ
+    app.run(host="0.0.0.0", port=int(environ.get("PORT", 5000)))
