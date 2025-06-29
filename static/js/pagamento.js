@@ -4,8 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Quando o servidor enviar confirmação de pagamento via WebSocket
   socket.on("pagamento_confirmado", (data) => {
+    console.log("Evento recebido:", data);
     const chaveCliente = sessionStorage.getItem("chave_pix");
-    if (data.chave === chaveCliente) {
+    if (data.chave.toLowerCase() === chaveCliente.toLowerCase()) {
       console.log("Pagamento confirmado via WebSocket:", data);
       alert("Pagamento confirmado! Redirecionando...");
       window.location.href = "/obrigado"; // Redireciona para a página de agradecimento
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         if (data.qr_code_base64) {
           sessionStorage.setItem("chave_pix", data.chave);
+          socket.emit("join", data.chave); // entra na sala da transação
           // Exibe o QR Code na imagem
           document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
           // Exibe o código copiável

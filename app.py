@@ -4,14 +4,15 @@ from dotenv import load_dotenv
 import os
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room
+from sqlalchemy import func
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key_default")
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 PUSHINPAY_TOKEN = os.environ.get("PUSHINPAY_TOKEN", "SUA_CHAVE_AQUI")
 
@@ -51,7 +52,7 @@ def gerar_pix():
         return "Quantidade inválida", 400
 
     # substitua pelo seu link de webhook
-    webhook_url = "https://e2ee-2804-1b3-9444-a8bc-f572-1919-b2b4-11cc.ngrok-free.app/webhook"
+    webhook_url = "https://6b33-2804-1b3-9444-a8bc-64a1-42fb-cf54-df84.ngrok-free.app/webhook"
 
     headers = {
         "Authorization": f"Bearer {PUSHINPAY_TOKEN}",
@@ -150,29 +151,57 @@ class Transacao(db.Model):
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
-        dados = request.json
-        chave = dados.get("chave")
-        print("Chave recebida no webhook:", chave)
-        status = dados.get("status")
+        print("Headers recebidos:", request.headers)
+        print("Content-Type:", request.content_type)
+        print("Body bruto:", request.data.decode())
 
-        print("Webhook recebido:", dados)
+        if request.is_json:
+            dados = request.get_json()
+        elif request.content_type == "application/x-www-form-urlencoded":
+            dados = request.form.to_dict()
+        else:
+            print("Webhook recebido com Content-Type inválido:",
+                  request.content_type)
+            return jsonify({"erro": "Requisição deve ser JSON ou form-urlencoded"}), 415
+
+        print("Dados interpretados:", dados)
+
+        chave = dados.get("chave") or dados.get("id")
+        status = dados.get("status")
+        if status:
+            status = status.lower()
+            if status == "paid":
+                status = "pago"
+            elif status == "pending":
+                status = "pendente"
+
+        print("Chave recebida no webhook:", chave)
+        print("Status recebido:", status)
 
         if not chave or not status:
             return jsonify({"erro": "Dados incompletos"}), 400
 
-        transacao = Transacao.query.filter_by(chave=chave).first()
+        transacao = Transacao.query.filter(func.lower(
+            Transacao.chave) == chave.lower()).first()
         if transacao:
             transacao.status = status
             db.session.commit()
             print(f"Emitindo evento pagamento_confirmado para chave: {chave}")
-            socketio.emit("pagamento_confirmado", {"chave": chave})
+            socketio.emit("pagamento_confirmado", {"chave": chave}, room=chave)
             print(f"Transação {chave} atualizada para {status}")
             return jsonify({"ok": True})
         else:
             return jsonify({"erro": "Transação não encontrada"}), 404
+
     except Exception as e:
         print("Erro no processamento do webhook:", e)
-        return jsonify({"erro": "Erro interno no servidor"}), 500
+        return jsonify({"erro": f"Erro interno no servidor: {str(e)}"}), 500
+
+
+@socketio.on("join")
+def handle_join(chave):
+    print(f"Cliente entrou na sala: {chave}")
+    join_room(chave)
 
 
 if __name__ == "__main__":
