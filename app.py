@@ -1,13 +1,14 @@
-from sqlalchemy import func
-from flask_socketio import SocketIO, emit, join_room
-from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, redirect, url_for, request, jsonify
-import os
-from dotenv import load_dotenv
-import requests
 from datetime import datetime
+import requests
+from dotenv import load_dotenv
+import os
+from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO, emit, join_room
+from sqlalchemy import func
 import eventlet
 eventlet.monkey_patch()
+
 
 load_dotenv()
 
