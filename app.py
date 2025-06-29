@@ -52,7 +52,7 @@ def gerar_pix():
         return "Quantidade inválida", 400
 
     # substitua pelo seu link de webhook
-    webhook_url = "https://6b33-2804-1b3-9444-a8bc-64a1-42fb-cf54-df84.ngrok-free.app/webhook"
+    webhook_url = "https://pagina-sorteio.onrender.com/webhook"
 
     headers = {
         "Authorization": f"Bearer {PUSHINPAY_TOKEN}",
