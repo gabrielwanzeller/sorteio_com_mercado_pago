@@ -148,6 +148,11 @@ class Transacao(db.Model):
     status = db.Column(db.String(20), default="pendente")
 
 
+@app.route("/healthz")
+def healthz():
+    return "ok", 200
+
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
     try:
@@ -209,5 +214,4 @@ def handle_join(chave):
 
 if __name__ == "__main__":
     from os import environ
-    socketio.run(app, debug=True, host="0.0.0.0",
-                 port=int(environ.get("PORT", 5000)))
+    socketio.run(app, host="0.0.0.0", port=int(environ.get("PORT", 5000)))
