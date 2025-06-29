@@ -204,5 +204,8 @@ def handle_join(chave):
     join_room(chave)
 
 
+# if __name__ == "__main__":
+#     socketio.run(app, debug=True, host='0.0.0.0', port=5001)
+
 if __name__ == "__main__":
-    socketio.run(app, debug=True, host='0.0.0.0', port=5001)
+    socketio.run(app, host="0.0.0.0", port=10000)
