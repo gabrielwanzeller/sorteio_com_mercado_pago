@@ -214,4 +214,5 @@ def handle_join(chave):
 
 if __name__ == "__main__":
     from os import environ
-    socketio.run(app, host="0.0.0.0", port=int(environ.get("PORT", 5000)))
+    socketio.run(app, host="0.0.0.0", port=int(
+        environ.get("PORT", 5000)), allow_unsafe_werkzeug=True)
