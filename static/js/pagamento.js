@@ -1,25 +1,61 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const valor = parseFloat(document.body.dataset.valor.replace(',', '.')); // R$ 0,99 por bilhete
+  console.log("JS carregado"); // Confirma se o JS foi executado
+  const socket = io(); // Conecta ao WebSocket para escutar eventos do servidor
 
-  fetch("/gerar-pix", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ valor: valor * 100 }) // em centavos
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.qr_code_base64) {
-        document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
-        document.getElementById("qrcodeTexto").value = data.qr_code;
-        consultarPagamentoPix(data.chave);
-      } else {
-        alert("Erro ao gerar QR Code");
-      }
-    });
+  // Quando o servidor enviar confirmação de pagamento via WebSocket
+  socket.on("pagamento_confirmado", (data) => {
+    const chaveCliente = sessionStorage.getItem("chave_pix");
+    if (data.chave === chaveCliente) {
+      console.log("Pagamento confirmado via WebSocket:", data);
+      alert("Pagamento confirmado! Redirecionando...");
+      window.location.href = "/obrigado"; // Redireciona para a página de agradecimento
+    }
+  });
 
-  iniciarContador(600); // 10 minutos em segundos
+  // Pega o valor do bilhete no atributo data do body (convertendo para número)
+  const valor = parseFloat(document.body.dataset.valor.replace(',', '.')); // Ex: R$ 0,99 por bilhete
+  console.log("Valor enviado para o backend:", valor);
+
+  try {
+    const payload = {
+      valor: valor * 100,
+      nome: document.body.dataset.nome || "Não informado",
+      quantidade: parseInt(document.body.dataset.quantidade) || 1,
+      produto: document.body.dataset.produto || "Produto",
+      webhook: window.location.origin + "/webhook"
+    };
+    console.log("Payload final a ser enviado:", payload);
+    fetch("/gerar-pix", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (data.qr_code_base64) {
+          sessionStorage.setItem("chave_pix", data.chave);
+          // Exibe o QR Code na imagem
+          document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
+          // Exibe o código copiável
+          document.getElementById("qrcodeTexto").value = data.qr_code;
+          // Inicia consulta periódica para verificar se o pagamento foi feito
+          consultarPagamentoPix(data.chave);
+        } else {
+          console.error("Resposta de /gerar-pix (erro):", data);
+          alert("Erro ao gerar QR Code");
+        }
+      })
+      .catch(err => {
+        console.error("Erro no fetch de /gerar-pix:", err);
+      });
+  } catch (e) {
+    console.error("Erro inesperado ao iniciar fetch:", e);
+  }
+
+  iniciarContador(600); // Inicia o contador de 10 minutos (600 segundos)
 });
 
+// Função para copiar o código do PIX para a área de transferência
 function copiarCodigo() {
   const texto = document.getElementById("qrcodeTexto").value;
   navigator.clipboard.writeText(texto).then(() => {
@@ -27,6 +63,7 @@ function copiarCodigo() {
   });
 }
 
+// Função para iniciar o contador regressivo
 function iniciarContador(segundos) {
   const contador = document.getElementById("contador");
 
@@ -39,28 +76,31 @@ function iniciarContador(segundos) {
       clearInterval(intervalo);
       contador.innerText = "Expirado";
       alert("O tempo expirou! Por favor, refaça a compra.");
-      window.location.href = "/";
+      window.location.href = "/"; // Redireciona para a home
     }
 
     segundos--;
   }, 1000);
 } 
 
+// Consulta o status do pagamento a cada 1 minuto
 function consultarPagamentoPix(chave) {
+  // 🔁 Consulta periódica (1x/minuto) como fallback até o webhook estar 100% confiável.
+  // Pode ser removido depois que o webhook estiver testado e funcionando em produção.
   const intervaloConsulta = setInterval(() => {
     fetch("/consultar-pix", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ chave })
+      body: JSON.stringify({ chave }) // Envia a chave da transação para verificar status
     })
       .then(res => res.json())
       .then(data => {
         if (data.status === "aprovado") {
-          clearInterval(intervaloConsulta);
+          clearInterval(intervaloConsulta); // Para a consulta se pagamento foi aprovado
           alert("Pagamento aprovado! Redirecionando...");
-          window.location.href = "/obrigado";
+          window.location.href = "/obrigado"; // Redireciona para página de obrigado
         }
       })
       .catch(error => {

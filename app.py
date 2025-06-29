@@ -4,11 +4,14 @@ from dotenv import load_dotenv
 import os
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO, emit
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key_default")
+
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 PUSHINPAY_TOKEN = os.environ.get("PUSHINPAY_TOKEN", "SUA_CHAVE_AQUI")
 
@@ -35,29 +38,47 @@ def home():
 @app.route("/gerar-pix", methods=["POST"])
 def gerar_pix():
     valor = request.json.get("valor")
+    print("JSON recebido em /gerar-pix:", request.json)
+    quantidade = request.json.get("quantidade")
+    produto = request.json.get("produto")
+    if not quantidade or not produto:
+        return "Campos obrigatórios não enviados", 400
+
+    try:
+        quantidade = int(quantidade)
+        valor_total = PRECO_POR_BILHETE * quantidade
+    except ValueError:
+        return "Quantidade inválida", 400
+
     # substitua pelo seu link de webhook
-    webhook_url = "https://seudominio.com/webhook"
+    webhook_url = "https://e2ee-2804-1b3-9444-a8bc-f572-1919-b2b4-11cc.ngrok-free.app/webhook"
 
     headers = {
         "Authorization": f"Bearer {PUSHINPAY_TOKEN}",
         "Content-Type": "application/json"
     }
     payload = {
-        "value": valor,
-        "webhook_url": webhook_url
+        "value": int(round(valor_total * 100)),
+        "webhook_url": webhook_url,
+        "external_reference": f"{datetime.now().timestamp()}_{produto}",
+        "split_rules": []
     }
 
     response = requests.post(
         "https://api.pushinpay.com.br/api/pix/cashIn", json=payload, headers=headers)
+    print("Status da resposta PushinPay:", response.status_code)
+    print(response.text)
 
     if response.status_code == 200:
         data = response.json()
         print("Resposta da Pushin:", data)
-        chave_pix = data.get("qr_code") or data.get("txid") or data.get(
-            "identificador") or data.get("chave")
+        chave_pix = data.get("id") or data.get("identificador")
         if not chave_pix:
+            print("Erro: Identificador da transação ausente na resposta da PushinPay")
             return jsonify({"erro": "Chave não recebida da PushinPay"}), 400
         print("Dados recebidos da PushinPay:", data)
+        print("Payload enviado à PushinPay:", payload)
+        print("Usando chave_pix:", chave_pix)
 
         nova_transacao = Transacao(
             chave=chave_pix,
@@ -67,8 +88,8 @@ def gerar_pix():
         db.session.commit()
 
         return jsonify({
-            "qr_code": data["qr_code"],
-            "qr_code_base64": data["qr_code_base64"],
+            "qr_code": data.get("qr_code"),
+            "qr_code_base64": data.get("qr_code_base64"),
             "chave": chave_pix
         })
     else:
@@ -100,13 +121,14 @@ def consultar_pix():
     if not chave:
         return jsonify({"erro": "Chave não fornecida"}), 400
 
-    url = "https://api.pushinpay.com.br/pix/consultar-pix"
+    url = f"https://api.pushinpay.com.br/api/transactions/{chave}"
     headers = {
-        "x-api-key": PUSHINPAY_TOKEN,
+        "Authorization": f"Bearer {PUSHINPAY_TOKEN}",
+        "Accept": "application/json",
         "Content-Type": "application/json"
     }
 
-    response = requests.get(url, headers=headers, json={"chave": chave})
+    response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         return jsonify(response.json())
@@ -130,6 +152,7 @@ def webhook():
     try:
         dados = request.json
         chave = dados.get("chave")
+        print("Chave recebida no webhook:", chave)
         status = dados.get("status")
 
         print("Webhook recebido:", dados)
@@ -141,6 +164,8 @@ def webhook():
         if transacao:
             transacao.status = status
             db.session.commit()
+            print(f"Emitindo evento pagamento_confirmado para chave: {chave}")
+            socketio.emit("pagamento_confirmado", {"chave": chave})
             print(f"Transação {chave} atualizada para {status}")
             return jsonify({"ok": True})
         else:
@@ -151,6 +176,4 @@ def webhook():
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5001)

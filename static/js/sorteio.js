@@ -91,18 +91,13 @@ document.addEventListener('DOMContentLoaded', function () {
   window.enviarCadastro = function () {
     const nome = document.getElementById("nome").value.trim();
     const celular = document.getElementById("celular").value.trim();
-    const celularConfirmacao = document.getElementById("celular-confirmacao").value.trim();
+    // const celularConfirmacao = document.getElementById("celular-confirmacao").value.trim();
     const email = document.getElementById("email").value.trim();
-    const cpf = document.getElementById("cpf").value.trim();
+    // const cpf = document.getElementById("cpf").value.trim();
     const quantidade = parseInt(quantityInput.value) || 10;
 
     if (!nome || !celular || !email) {
       alert("Por favor, preencha todos os campos obrigatórios.");
-      return;
-    }
-
-    if (celular !== celularConfirmacao) {
-      alert("Os celulares não coincidem.");
       return;
     }
 
@@ -119,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function () {
       nome,
       celular,
       email,
-      cpf,
       quantidade: quantidadeFinal,
       valorAdicional
     };

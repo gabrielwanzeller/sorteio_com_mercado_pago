@@ -7,7 +7,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/pagamento.css') }}">
 </head>
-<body data-valor="{{ total }}">
+<body 
+  data-nome="{{ nome }}" 
+  data-produto="{{ produto }}" 
+  data-quantidade="{{ quantidade }}" 
+  data-valor="{{ total }}">
   <div class="container">
     <h2>⏳ Você tem <span id="contador">10:00</span> para pagar</h2>
     <p>Siga os passos abaixo para completar o pagamento via PIX:</p>
@@ -38,7 +42,7 @@
 
     <div id="pixArea">
       <input type="text" id="qrcodeTexto" class="pix-codigo" readonly>
-      <button onclick="copiarCodigo()">📋 Copiar código PIX</button>
+      <button onclick="copiarCodigo()"><i class="fas fa-copy"></i> Copiar código PIX</button>
     </div>
 
     <p class="ou">ou</p>
@@ -48,10 +52,10 @@
     </div>
 
     <button class="btn-exibir-qrcode" onclick="document.querySelector('.qrcode').style.display = 'block'; this.style.display = 'none';">
-      📷 Exibir QR Code
+      <i class="fas fa-qrcode"></i> Exibir QR Code
     </button>
 
-    <p class="alerta">⚠️ Este pagamento deve ser feito dentro do tempo. Caso contrário, os títulos voltam a ficar disponíveis.</p>
+    <p class="alerta"><i class="fas fa-exclamation-triangle"></i> Este pagamento deve ser feito dentro do tempo. Caso contrário, os títulos voltam a ficar disponíveis.</p>
 
     <div class="resumo-compra">
       <h3>Resumo da Compra</h3>
@@ -65,6 +69,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="{{ url_for('static', filename='js/pagamento.js') }}"></script>
 </body>
 </html>
