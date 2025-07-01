@@ -2,19 +2,22 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("JS carregado"); // Confirma se o JS foi executado
   const socket = io({ transports: ['websocket'], upgrade: false }); // Usa somente WebSocket puro
 
+  socket.on("connect_error", (err) => {
+    console.error("Erro de conexão com o WebSocket:", err);
+  });
+
   // Fallback: garante que o cliente entre na sala mesmo se houver atraso no fetch
-  const chavePixSalva = sessionStorage.getItem("chave_pix");
-  if (chavePixSalva) {
-    socket.emit("join", chavePixSalva);
+  const chaveCliente = sessionStorage.getItem("chave_pix");
+  if (chaveCliente) {
+    socket.emit("join", chaveCliente);
   }
 
   // Quando o servidor enviar confirmação de pagamento via WebSocket
   socket.on("pagamento_confirmado", (data) => {
     console.log("Evento recebido:", data);
-    const chaveCliente = sessionStorage.getItem("chave_pix");
     console.log("Chave recebida no evento:", data.chave);
     console.log("Chave salva no sessionStorage:", chaveCliente);
-    if (data.chave.toLowerCase() === chaveCliente.toLowerCase()) {
+    if (data.chave && chaveCliente && data.chave.toLowerCase() === chaveCliente.toLowerCase()) {
       console.log("Pagamento confirmado via WebSocket:", data);
       alert("Pagamento confirmado! Redirecionando...");
       window.location.href = "/obrigado"; // Redireciona para a página de agradecimento
@@ -43,7 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         if (data.qr_code_base64) {
           sessionStorage.setItem("chave_pix", data.chave);
-          socket.emit("join", data.chave); // entra na sala da transação
+          if (!chaveCliente) {
+            socket.emit("join", data.chave); // entra na sala da transação
+          }
           // Exibe o QR Code na imagem
           document.getElementById("qrcodeImg").src = data.qr_code_base64.replace(/\s/g, '');
           // Exibe o código copiável
