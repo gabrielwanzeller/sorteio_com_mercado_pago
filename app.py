@@ -1,6 +1,9 @@
 # isort: skip_file
-import eventlet
-eventlet.monkey_patch()
+try:
+    import eventlet
+    eventlet.monkey_patch()
+except AttributeError:
+    print("Eventlet não é compatível com a versão atual do Python. Sugerido usar Python 3.11.x")
 
 # A partir daqui, os outros imports
 from datetime import datetime
