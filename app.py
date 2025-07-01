@@ -1,4 +1,7 @@
 # isort: skip_file
+import os
+os.environ["EVENTLET_NO_GREENDNS"] = "yes"
+
 try:
     import eventlet
     eventlet.monkey_patch()
