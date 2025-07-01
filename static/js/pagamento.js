@@ -2,10 +2,18 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("JS carregado"); // Confirma se o JS foi executado
   const socket = io(); // Conecta ao WebSocket para escutar eventos do servidor
 
+  // Fallback: garante que o cliente entre na sala mesmo se houver atraso no fetch
+  const chavePixSalva = sessionStorage.getItem("chave_pix");
+  if (chavePixSalva) {
+    socket.emit("join", chavePixSalva);
+  }
+
   // Quando o servidor enviar confirmação de pagamento via WebSocket
   socket.on("pagamento_confirmado", (data) => {
     console.log("Evento recebido:", data);
     const chaveCliente = sessionStorage.getItem("chave_pix");
+    console.log("Chave recebida no evento:", data.chave);
+    console.log("Chave salva no sessionStorage:", chaveCliente);
     if (data.chave.toLowerCase() === chaveCliente.toLowerCase()) {
       console.log("Pagamento confirmado via WebSocket:", data);
       alert("Pagamento confirmado! Redirecionando...");
