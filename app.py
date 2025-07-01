@@ -19,7 +19,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key_default")
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 PUSHINPAY_TOKEN = os.environ.get("PUSHINPAY_TOKEN", "SUA_CHAVE_AQUI")
 
@@ -216,14 +216,12 @@ def handle_join(chave):
     join_room(chave)
 
 
-# if __name__ == "__main__":
-#     socketio.run(app, debug=True, host='0.0.0.0', port=5001)
 
 if __name__ == "__main__":
-    from os import environ
-    print("Iniciando app Flask com SocketIO")
-    socketio.run(app,
-                 host="0.0.0.0",
-                 port=int(environ.get("PORT", 5000)),
-                 debug=True,
-                 allow_unsafe_werkzeug=True)
+    import eventlet
+    import eventlet.wsgi
+
+    print("Iniciando app Flask com WebSocket via Eventlet")
+    eventlet.wsgi.server(
+        eventlet.listen(("0.0.0.0", int(os.environ.get("PORT", 5000)))), app
+    )
