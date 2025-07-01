@@ -1,12 +1,6 @@
 # isort: skip_file
-import os
-os.environ["EVENTLET_NO_GREENDNS"] = "yes"
 
-try:
-    import eventlet
-    eventlet.monkey_patch()
-except AttributeError:
-    print("Eventlet não é compatível com a versão atual do Python. Sugerido usar Python 3.11.x")
+import os
 
 # A partir daqui, os outros imports
 from datetime import datetime
@@ -25,7 +19,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key_default")
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 PUSHINPAY_TOKEN = os.environ.get("PUSHINPAY_TOKEN", "SUA_CHAVE_AQUI")
 

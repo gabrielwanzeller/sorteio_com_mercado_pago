@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("JS carregado"); // Confirma se o JS foi executado
-  const socket = io(); // Conecta ao WebSocket para escutar eventos do servidor
+  const socket = io({ transports: ['websocket'], upgrade: false }); // Usa somente WebSocket puro
 
   // Fallback: garante que o cliente entre na sala mesmo se houver atraso no fetch
   const chavePixSalva = sessionStorage.getItem("chave_pix");
